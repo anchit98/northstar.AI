@@ -2,6 +2,7 @@ import "server-only";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { compactFeedMarkdown } from "./intelFeedCompact";
 
 const INTEL_DIR = path.join(process.cwd(), "../outputs/intel");
 const FEED_DIR = path.join(INTEL_DIR, "feed");
@@ -337,7 +338,7 @@ export function listFeedDatesForWeek(weekId: string): string[] {
 
 export function getFeedMarkdownForWeek(
   weekId: string,
-  maxChars = 55_000
+  maxChars = 38_000
 ): {
   week: string;
   files: string[];
@@ -365,10 +366,7 @@ export function getFeedMarkdownForWeek(
     );
   }
 
-  let markdown = parts.join("\n\n---\n\n");
-  if (markdown.length > maxChars) {
-    markdown = `${markdown.slice(0, maxChars)}\n\n_[Feed context truncated for token limit]_`;
-  }
+  const markdown = compactFeedMarkdown(parts.join("\n\n---\n\n"), maxChars);
 
   return {
     week: weekId,
@@ -384,7 +382,7 @@ export function getFeedMarkdownForWeek(
 /** Rolling last N calendar days of feed (alternative to ISO week). */
 export function getFeedMarkdownRollingDays(
   days: number,
-  maxChars = 55_000
+  maxChars = 30_000
 ): {
   files: string[];
   markdown: string;
@@ -406,10 +404,7 @@ export function getFeedMarkdownRollingDays(
     );
   }
 
-  let markdown = parts.join("\n\n---\n\n");
-  if (markdown.length > maxChars) {
-    markdown = `${markdown.slice(0, maxChars)}\n\n_[Feed context truncated for token limit]_`;
-  }
+  const markdown = compactFeedMarkdown(parts.join("\n\n---\n\n"), maxChars);
 
   return { files: dates, markdown, urls, itemCount };
 }
@@ -488,7 +483,7 @@ export function readLinkedinStyleRaw(): string {
 }
 
 /** Samples + voice notes only — keeps Groq requests under context limits. */
-export function readLinkedinStyleForPrompt(maxChars = 50_000): string {
+export function readLinkedinStyleForPrompt(maxChars = 22_000): string {
   let raw = readLinkedinStyleRaw();
   try {
     const { content } = matter(raw);

@@ -36,5 +36,6 @@ export type FeedManifest = {
   sources_healthy: number;
   sources_dead: number;
   item_count: number;
+  skipped_duplicate?: number;
   source_results: { id: string; name: string; ok: boolean; error?: string; count: number }[];
 };

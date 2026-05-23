@@ -93,6 +93,15 @@
   .prose-career hr {
     @apply border-outline-variant my-8;
   }
+  .prose-career pre {
+    @apply overflow-x-auto max-w-full rounded-xl border border-border-subtle bg-surface-container p-4 my-4 text-sm leading-relaxed;
+  }
+  .prose-career pre code {
+    @apply block whitespace-pre-wrap break-words text-on-surface-variant font-sans text-body-md;
+  }
+  .prose-career :not(pre) > code {
+    @apply text-sm font-mono bg-surface-container px-1.5 py-0.5 rounded break-words;
+  }
   .prose-resume {
     @apply prose-career text-[11pt] leading-snug;
   }

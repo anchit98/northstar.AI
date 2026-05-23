@@ -13,7 +13,9 @@ export default function BrandingPage() {
           Positioning, LinkedIn, content pillars, networking, and interview intro scripts — by topic.
         </p>
       </div>
-      <BrandingViewer content={content} />
+      <div className="min-w-0 w-full max-w-full">
+        <BrandingViewer content={content} />
+      </div>
       <SyncFooter meta={meta} />
     </div>
   );

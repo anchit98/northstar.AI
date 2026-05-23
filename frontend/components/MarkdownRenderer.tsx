@@ -29,7 +29,7 @@ export function MarkdownRenderer({
   highlightHooks = false,
 }: MarkdownRendererProps) {
   return (
-    <div className={cn("prose-career", className)}>
+    <div className={cn("prose-career min-w-0 max-w-full", className)}>
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{

@@ -31,19 +31,19 @@ function IntroductionsPanel({ content }: { content: string }) {
   }, [content]);
 
   return (
-    <div className="flex flex-col gap-8">
-      {preamble ? <MarkdownRenderer content={preamble} /> : null}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+    <div className="flex flex-col gap-8 min-w-0 w-full max-w-full">
+      {preamble ? <MarkdownRenderer content={preamble} className="min-w-0 max-w-full" /> : null}
+      <div className="grid grid-cols-1 gap-6 min-w-0 w-full">
         {blocks.map((b) => (
           <article
             key={b.title}
-            className="bg-surface-raised border border-border-subtle rounded-xl p-6 flex flex-col gap-4"
+            className="bg-surface-raised border border-border-subtle rounded-xl p-4 sm:p-6 flex flex-col gap-4 min-w-0 w-full max-w-full overflow-hidden"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <h3 className="text-headline-md font-semibold text-on-surface">{b.title}</h3>
               {b.script && <CopyButton text={b.script} label="Copy script" />}
             </div>
-            <MarkdownRenderer content={b.body} />
+            <MarkdownRenderer content={b.body} className="min-w-0 max-w-full overflow-x-hidden" />
           </article>
         ))}
       </div>
@@ -62,7 +62,7 @@ export function BrandingViewer({ content }: BrandingViewerProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 min-w-0 w-full max-w-full">
       <div
         className="flex border-b border-outline-variant overflow-x-auto no-print gap-1"
         role="tablist"
@@ -87,7 +87,7 @@ export function BrandingViewer({ content }: BrandingViewerProps) {
         ))}
       </div>
 
-      <div role="tabpanel" className="min-h-[12rem]">
+      <div role="tabpanel" className="min-h-[12rem] min-w-0 w-full max-w-full overflow-x-hidden">
         {active.id === "interview-introductions" ? (
           <IntroductionsPanel content={active.content} />
         ) : (

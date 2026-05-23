@@ -29,6 +29,9 @@ export function buildFeedMarkdown(
     `sources_healthy: ${manifest.sources_healthy}`,
     `sources_dead: ${manifest.sources_dead}`,
     `item_count: ${manifest.item_count}`,
+    ...(manifest.skipped_duplicate != null && manifest.skipped_duplicate > 0
+      ? [`skipped_duplicate: ${manifest.skipped_duplicate}`]
+      : []),
     "source_results:",
     ...manifest.source_results.map(
       (r) =>

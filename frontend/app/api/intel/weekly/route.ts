@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
-import { groqChatWithFallback } from "@/lib/groq";
+import { groqChatWithFallback, getConfiguredGroqModel } from "@/lib/groq";
 import {
   applyModelToGeneratedDoc,
   intelCitationWarnings,
@@ -11,6 +11,7 @@ import {
   type FeedInputMode,
 } from "@/lib/intelGenerate";
 import { readBrandingPositioningSection } from "@/lib/intel";
+import { tryWriteIntelFile } from "@/lib/intelPersist";
 
 const WEEKLY_DIR = path.join(process.cwd(), "../outputs/intel/weekly");
 const PROMPT_PATH = path.join(process.cwd(), "../prompts/intel_weekly.md");
@@ -29,7 +30,11 @@ export async function POST(request: NextRequest) {
       ? body.week
       : todayIsoWeekIst();
 
-  const feedContext = resolveFeedContext({ mode, weekId });
+  const feedContext = resolveFeedContext({
+    mode,
+    weekId,
+    maxFeedChars: mode === "rolling-7" ? 28_000 : 38_000,
+  });
 
   if (feedContext.files.length === 0) {
     return NextResponse.json(
@@ -56,11 +61,12 @@ Mode: ${mode}
 Week range: ${feedContext.rangeStart} – ${feedContext.rangeEnd}
 Feed files (${feedContext.files.length}): ${feedContext.files.join(", ")}
 Approximate item count: ${feedContext.itemCount}
+Configured Groq model: ${getConfiguredGroqModel()}
 
 --- personal_branding.md (positioning) ---
 ${positioning}
 
---- feed items ---
+--- feed items (compact summaries) ---
 ${feedContext.markdown}
 
 --- prompt spec ---
@@ -69,12 +75,17 @@ ${promptSpec.slice(0, 4000)}
 Produce YAML frontmatter (week, generated_at, feed_days_included, model placeholder, item_count, week_start, week_end) then the five sections.`;
 
   try {
-    const { content: generated, model: modelUsed } = await groqChatWithFallback(
+    const {
+      content: generated,
+      model: modelUsed,
+      retriedWithShrink,
+      usedFallbackModel,
+    } = await groqChatWithFallback(
       [
         { role: "system", content: system },
         { role: "user", content: user },
       ],
-      { maxTokens: 5000 }
+      { model: getConfiguredGroqModel(), maxTokens: 5000 }
     );
 
     const generatedAt = new Date().toISOString();
@@ -97,24 +108,42 @@ ${generated.trim()}
 `;
 
     const doc = applyModelToGeneratedDoc(generated, modelUsed, fallbackDoc);
-
-    if (!fs.existsSync(WEEKLY_DIR)) fs.mkdirSync(WEEKLY_DIR, { recursive: true });
     const outPath = path.join(WEEKLY_DIR, `${weekId}.md`);
-    fs.writeFileSync(outPath, doc, "utf8");
+    const writeResult = tryWriteIntelFile(outPath, doc);
 
     const warnings = intelCitationWarnings(generated, feedContext.urls, {
       notInFeedLabel: "URL not in week feed files",
     });
 
+    if (usedFallbackModel) {
+      warnings.unshift(
+        `Used fallback model ${modelUsed} after context limits — set GROQ_MODEL on Vercel to your preferred model (${getConfiguredGroqModel()}).`
+      );
+    } else if (retriedWithShrink) {
+      warnings.unshift("Feed context was shrunk and retried on your configured model.");
+    }
+
     return NextResponse.json({
       ok: true,
-      path: `outputs/intel/weekly/${weekId}.md`,
+      path: writeResult.persisted ? `outputs/intel/weekly/${weekId}.md` : undefined,
       week: weekId,
       feedDays: feedContext.files.length,
+      model: modelUsed,
+      configuredModel: getConfiguredGroqModel(),
+      persisted: writeResult.persisted,
+      storageNote: writeResult.error,
+      content: doc,
       warnings,
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: message }, { status: 502 });
+    return NextResponse.json(
+      {
+        error: message,
+        configuredModel: getConfiguredGroqModel(),
+        hint: "If token/context errors persist, try rolling-7 with fewer feed days or set GROQ_MODEL in Vercel env.",
+      },
+      { status: 502 }
+    );
   }
 }

@@ -346,7 +346,7 @@ cd frontend && npm run dev
 | Implement `scripts/intel/fetch.ts` | Reads sources → writes `feed/YYYY-MM-DD.md` |
 | Implement `scripts/intel/lib/sources.ts` | Parser for sources.md |
 | Implement `scripts/intel/lib/markdown.ts` | Frontmatter + grouped body writer |
-| Dedup by URL per day | No duplicate links in single file |
+| Dedup | Same-day link dedup; cross-day skip if link, source+title, or source+summary already in last 14 days (`scripts/intel/lib/dedup.ts`) |
 
 **Exit:** `npm run intel:fetch` produces today's feed file locally.
 

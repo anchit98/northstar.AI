@@ -10,11 +10,13 @@
 
 NorthStar AI is a **monorepo**: markdown at the repo root (`outputs/`, `inputs/`, `analysis/`, `docs/`), Next.js in `frontend/`.
 
-| Layer | Host | Role |
-|-------|------|------|
-| **App (UI + API)** | **Vercel** | Public resume routes, open workbench, `/api/intel/*` |
+
+| Layer                | Host               | Role                                                               |
+| -------------------- | ------------------ | ------------------------------------------------------------------ |
+| **App (UI + API)**   | **Vercel**         | Public resume routes, open workbench, `/api/intel/`*               |
 | **Daily RSS ingest** | **GitHub Actions** | `npm run intel:fetch` → commits `outputs/intel/feed/*.md` (no LLM) |
-| **CI** | **GitHub Actions** | Lint + build on push/PR |
+| **CI**               | **GitHub Actions** | Lint + build on push/PR                                            |
+
 
 There is **no separate backend host** and **no Render** — Vercel serverless functions handle API routes; GitHub Actions handle scheduled ingest.
 
@@ -57,6 +59,8 @@ flowchart TB
   CI --> Repo
 ```
 
+
+
 **Data flow (DEC-19):**
 
 1. Edit markdown under `outputs/`, `inputs/`, `analysis/`.
@@ -91,11 +95,13 @@ If build fails with `EINVAL readlink` on Windows/OneDrive, delete `frontend/.nex
 
 ### Secrets hygiene
 
-| Item | Rule |
-|------|------|
-| `frontend/.env` | Never commit (in `.gitignore`) |
-| API keys | Only in Vercel env + local `.env` |
+
+| Item                         | Rule                                    |
+| ---------------------------- | --------------------------------------- |
+| `frontend/.env`              | Never commit (in `.gitignore`)          |
+| API keys                     | Only in Vercel env + local `.env`       |
 | Sensitive outreach/comp data | Use a **private** GitHub repo if needed |
+
 
 ---
 
@@ -103,7 +109,7 @@ If build fails with `EINVAL readlink` on Windows/OneDrive, delete `frontend/.nex
 
 ### Step 1 — Push code to GitHub
 
-Repo URL: **https://github.com/anchit98/northstar.AI.git**
+Repo URL: **[https://github.com/anchit98/northstar.AI.git](https://github.com/anchit98/northstar.AI.git)**
 
 From your machine (monorepo root):
 
@@ -140,10 +146,12 @@ git push -u origin main
 
 **Workflows in this repo:**
 
-| Workflow | File | Trigger |
-|----------|------|---------|
-| Intel daily feed | `.github/workflows/intel-daily.yml` | Cron `30 1 * * *` UTC (~07:00 IST) + manual |
-| CI | `.github/workflows/ci.yml` | Push/PR to `main` |
+
+| Workflow         | File                                | Trigger                                     |
+| ---------------- | ----------------------------------- | ------------------------------------------- |
+| Intel daily feed | `.github/workflows/intel-daily.yml` | Cron `30 1 * * `* UTC (~07:00 IST) + manual |
+| CI               | `.github/workflows/ci.yml`          | Push/PR to `main`                           |
+
 
 **Test intel ingest:** Actions → **Intel Daily Feed** → **Run workflow** → confirm a new commit under `outputs/intel/feed/`.
 
@@ -160,10 +168,12 @@ git push -u origin main
 
 Vercel → Project → **Settings** → **Environment Variables** → **Production** (and **Preview** if you use branch deploys):
 
-| Variable | Required | Notes |
-|----------|----------|--------|
-| `GROQ_API_KEY` | **Yes** (for Generate buttons) | Server-only |
-| `GROQ_MODEL` | Optional | Default: `meta-llama/llama-4-scout-17b-16e-instruct` |
+
+| Variable       | Required                       | Notes                                                |
+| -------------- | ------------------------------ | ---------------------------------------------------- |
+| `GROQ_API_KEY` | **Yes** (for Generate buttons) | Server-only                                          |
+| `GROQ_MODEL`   | Optional                       | Default: `meta-llama/llama-4-scout-17b-16e-instruct` |
+
 
 Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 
@@ -175,59 +185,74 @@ Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 
 ### Step 6 — Production smoke test
 
-| Check | URL / action | Expected |
-|-------|----------------|----------|
-| Public resume | `/resume/one-page` | Renders |
-| Workbench | `/workbench` | Opens directly (no passcode) |
-| Intel feed | `/workbench/intel/feed` | Latest `feed/YYYY-MM-DD.md` |
-| Mobile nav | Resize to phone width | Bottom nav + menu work |
 
-### Step 7 — Intel LLM on Vercel (know this limit)
+| Check         | URL / action            | Expected                     |
+| ------------- | ----------------------- | ---------------------------- |
+| Public resume | `/resume/one-page`      | Renders                      |
+| Workbench     | `/workbench`            | Opens directly (no passcode) |
+| Intel feed    | `/workbench/intel/feed` | Latest `feed/YYYY-MM-DD.md`  |
+| Mobile nav    | Resize to phone width   | Bottom nav + menu work       |
 
-`POST /api/intel/weekly` and `POST /api/intel/posts` write to `outputs/intel/` on the **ephemeral** serverless filesystem. Files **do not persist** on Vercel after the request ends.
 
-| Environment | Weekly/posts files |
-|-------------|-------------------|
-| Local `npm run dev` | Saved in repo on disk |
-| Vercel | Use UI to **copy** output, or generate locally and commit |
+### Step 7 — Intel LLM on Vercel (know these limits)
+
+**Model:** Set `GROQ_MODEL` in Vercel env (e.g. `meta-llama/llama-4-scout-17b-16e-instruct`). The API reads it at **request time** — redeploy after changing env vars. The workbench shows which model actually ran.
+
+**Filesystem:** Vercel serverless is read-only (`EROFS`). Weekly/post routes do not write under `outputs/intel/` on Vercel; they return full markdown in the JSON response and the UI shows an inline **preview** (copy from there, or generate locally and commit).
+
+
+| Environment         | Weekly/posts files                                        |
+| ------------------- | --------------------------------------------------------- |
+| Local `npm run dev` | Saved in repo on disk                                     |
+| Vercel              | Preview in UI only; copy or run locally to commit         |
+
+**Large feeds:** ISO-week can hit Groq context limits. Prefer **rolling last 7 feed days** on production. The API shrinks feed context and retries your configured model before falling back to `llama-3.3-70b-versatile`.
+
 
 ---
 
 ## 5. Ongoing operations
 
-| Task | How |
-|------|-----|
-| Ship UI/docs changes | `git push` to `main` → Vercel deploy |
-| Refresh daily RSS | Automatic via `intel-daily.yml`, or manual workflow run |
-| Add/remove feeds | Edit `outputs/intel/sources.md`, push; next fetch uses registry |
-| Workbench access | Open `/workbench` (no login) |
-| Preview branch | Push to `develop` (optional) → Vercel preview URL |
+
+| Task                 | How                                                             |
+| -------------------- | --------------------------------------------------------------- |
+| Ship UI/docs changes | `git push` to `main` → Vercel deploy                            |
+| Refresh daily RSS    | Automatic via `intel-daily.yml`, or manual workflow run         |
+| Add/remove feeds     | Edit `outputs/intel/sources.md`, push; next fetch uses registry |
+| Workbench access     | Open `/workbench` (no login)                                    |
+| Preview branch       | Push to `develop` (optional) → Vercel preview URL               |
+
 
 ---
 
 ## 6. Security checklist
 
-| # | Check |
-|---|--------|
-| 1 | `GROQ_API_KEY` not in git |
-| 2 | Repo visibility matches sensitivity of `outputs/` |
-| 3 | [content_contract.md](../frontend/content_contract.md) — public routes only resume/projects/branding |
-| 4 | `/workbench/*` has `X-Robots-Tag: noindex` (middleware) |
-| 5 | Intel LLM persistence understood (§ Step 7) |
+
+| #   | Check                                                                                                |
+| --- | ---------------------------------------------------------------------------------------------------- |
+| 1   | `GROQ_API_KEY` not in git                                                                            |
+| 2   | Repo visibility matches sensitivity of `outputs/`                                                    |
+| 3   | [content_contract.md](../frontend/content_contract.md) — public routes only resume/projects/branding |
+| 4   | `/workbench/`* has `X-Robots-Tag: noindex` (middleware)                                              |
+| 5   | Intel LLM persistence understood (§ Step 7)                                                          |
+
 
 ---
 
 ## 7. Troubleshooting
 
-| Issue | Fix |
-|-------|-----|
-| Vercel: `outputs/` not found | Root Directory must be `frontend`, full repo connected |
-| Build `EINVAL readlink` (Windows) | Delete `frontend/.next`, rebuild outside OneDrive sync if possible |
-| Workbench 404 | Confirm Vercel root directory is `frontend` |
-| Groq 502 on Generate | Check `GROQ_API_KEY`, model name, payload size |
-| Feed empty on production | Run **Intel Daily Feed** workflow; confirm commit on `main`; wait for redeploy |
-| Actions cannot commit | Workflow permissions → Read and write |
-| Push rejected | `git pull --rebase origin main` then push |
+
+| Issue                             | Fix                                                                            |
+| --------------------------------- | ------------------------------------------------------------------------------ |
+| Vercel: `outputs/` not found      | Root Directory must be `frontend`, full repo connected                         |
+| Build `EINVAL readlink` (Windows) | Delete `frontend/.next`, rebuild outside OneDrive sync if possible             |
+| Workbench 404                     | Confirm Vercel root directory is `frontend`                                    |
+| Groq 502 / token limit on Generate | Set `GROQ_MODEL` on Vercel; use rolling-7; compare `configuredModel` vs `model` in response |
+| EROFS on weekly/posts             | Expected on Vercel — use inline preview; save locally if you need files in git |
+| Feed empty on production          | Run **Intel Daily Feed** workflow; confirm commit on `main`; wait for redeploy |
+| Actions cannot commit             | Workflow permissions → Read and write                                          |
+| Push rejected                     | `git pull --rebase origin main` then push                                      |
+
 
 ---
 
@@ -239,7 +264,7 @@ Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 □ GitHub Actions: Intel Daily Feed manual run → feed commit
 □ GitHub Actions: CI green
 □ Vercel: import repo, root directory frontend
-□ Vercel: GROQ_API_KEY
+□ Vercel: GROQ_API_KEY + GROQ_MODEL (optional)
 □ Smoke test public + workbench + intel feed
 □ (Optional) Custom domain on Vercel
 ```
@@ -254,7 +279,10 @@ Skip Vercel entirely: `npm run dev` in `frontend/` and `npm run intel:fetch` at 
 
 ## 10. Revision history
 
-| Version | Date | Change |
-|---------|------|--------|
-| 1.0 | 2026-05-23 | Initial plan (included optional Render) |
-| 1.1 | 2026-05-23 | Render removed; GitHub + Vercel only; setup steps for anchit98/northstar.AI; ci.yml committed |
+
+| Version | Date       | Change                                                                                        |
+| ------- | ---------- | --------------------------------------------------------------------------------------------- |
+| 1.0     | 2026-05-23 | Initial plan (included optional Render)                                                       |
+| 1.1     | 2026-05-23 | Render removed; GitHub + Vercel only; setup steps for anchit98/northstar.AI; ci.yml committed |
+
+

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
-import { groqChatWithFallback } from "@/lib/groq";
+import { groqChatWithFallback, getConfiguredGroqModel } from "@/lib/groq";
 import {
   applyModelToGeneratedDoc,
   resolveFeedContext,
@@ -17,6 +17,7 @@ import {
   readWeeklySynthesisExcerpt,
 } from "@/lib/intel";
 import { INTEL_CONTENT_PILLARS, parsePillarFilter } from "@/lib/intelPillars";
+import { tryWriteIntelFile } from "@/lib/intelPersist";
 
 const POSTS_DIR = path.join(process.cwd(), "../outputs/intel/posts");
 const PROMPT_PATH = path.join(process.cwd(), "../prompts/intel_post.md");
@@ -57,7 +58,12 @@ export async function POST(request: NextRequest) {
     typeof body.rollingDays === "number" ? Math.min(14, Math.max(1, body.rollingDays)) : 7;
   const includeWeekly = body.includeWeekly !== false;
 
-  const feedContext = resolveFeedContext({ mode, weekId, rollingDays });
+  const feedContext = resolveFeedContext({
+    mode,
+    weekId,
+    rollingDays,
+    maxFeedChars: mode === "rolling-7" ? 24_000 : 32_000,
+  });
 
   if (feedContext.files.length === 0) {
     return NextResponse.json(
@@ -71,9 +77,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const styleRaw = readLinkedinStyleForPrompt();
+  const styleRaw = readLinkedinStyleForPrompt(20_000);
   const pillars = readBrandingPillarsSection();
-  const weeklyExcerpt = includeWeekly ? readWeeklySynthesisExcerpt(weekId) : "";
+  const weeklyExcerpt = includeWeekly ? readWeeklySynthesisExcerpt(weekId, 3_500) : "";
   const promptSpec = fs.existsSync(PROMPT_PATH) ? fs.readFileSync(PROMPT_PATH, "utf8") : "";
   const selected = INTEL_CONTENT_PILLARS.find((p) => p.id === pillarFilter)!;
   const pillarList = INTEL_CONTENT_PILLARS.map(
@@ -98,6 +104,7 @@ ISO week: ${weekId}
 Feed input mode: ${mode}
 Feed range: ${feedContext.rangeStart} – ${feedContext.rangeEnd}
 Feed files (${feedContext.files.length}): ${feedContext.files.join(", ")}
+Configured Groq model: ${getConfiguredGroqModel()}
 Style source: linkedin_style
 
 All pillars (reference — do not write for other pillars):
@@ -109,7 +116,7 @@ ${pillars}
 --- linkedin_style.md (samples + voice notes) ---
 ${styleRaw}
 
---- intel feed items ---
+--- intel feed items (compact summaries) ---
 ${feedContext.markdown}
 
 ${
@@ -119,19 +126,24 @@ ${
 }
 
 --- prompt spec ---
-${promptSpec.slice(0, 4000)}
+${promptSpec.slice(0, 3500)}
 
 Produce YAML frontmatter then ${VARIANT_COUNT} variants for ${pillarFilter} only.
 Each variant: ## Variant N — short title, full post, then <!-- meta: ${pillarFilter} -->.
 No labeled fields. No source URL lists.`;
 
   try {
-    const { content: generated, model: modelUsed } = await groqChatWithFallback(
+    const {
+      content: generated,
+      model: modelUsed,
+      retriedWithShrink,
+      usedFallbackModel,
+    } = await groqChatWithFallback(
       [
         { role: "system", content: system },
         { role: "user", content: user },
       ],
-      { maxTokens: 5000 }
+      { model: getConfiguredGroqModel(), maxTokens: 5000 }
     );
 
     const date = todayIsoDateIst();
@@ -163,21 +175,44 @@ ${generated.trim()}
 `;
 
     const doc = applyModelToGeneratedDoc(generated, modelUsed, fallbackDoc);
-
-    if (!fs.existsSync(POSTS_DIR)) fs.mkdirSync(POSTS_DIR, { recursive: true });
     const outPath = path.join(POSTS_DIR, `${date}.md`);
-    fs.writeFileSync(outPath, doc, "utf8");
+    const writeResult = tryWriteIntelFile(outPath, doc);
+
+    const notices: string[] = [];
+    if (usedFallbackModel) {
+      notices.push(
+        `Used fallback model ${modelUsed}. Set GROQ_MODEL=${getConfiguredGroqModel()} on Vercel to use your preferred model.`
+      );
+    } else if (retriedWithShrink) {
+      notices.push("Feed/style context was shrunk and retried on your configured model.");
+    }
+    if (!writeResult.persisted && writeResult.error) {
+      notices.push(writeResult.error);
+    }
 
     return NextResponse.json({
       ok: true,
-      path: `outputs/intel/posts/${date}.md`,
+      path: writeResult.persisted ? `outputs/intel/posts/${date}.md` : undefined,
       date,
       week: weekId,
       feedDays: feedContext.files.length,
       weeklyContextUsed: weeklyExcerpt.length > 0,
+      model: modelUsed,
+      configuredModel: getConfiguredGroqModel(),
+      persisted: writeResult.persisted,
+      storageNote: writeResult.error,
+      content: doc,
+      notices,
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: message }, { status: 502 });
+    return NextResponse.json(
+      {
+        error: message,
+        configuredModel: getConfiguredGroqModel(),
+        hint: "If token/context errors persist, use rolling-7, fewer feed days, or verify GROQ_MODEL on Vercel.",
+      },
+      { status: 502 }
+    );
   }
 }

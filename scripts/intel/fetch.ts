@@ -7,6 +7,12 @@ import path from "path";
 import Parser from "rss-parser";
 import { FEED_DIR, loadSources } from "./lib/sources.js";
 import { matchesAiPmContent } from "./lib/filter.js";
+import {
+  isDuplicateFeedItem,
+  loadPriorDedupIndex,
+  normalizeLink,
+  registerFeedItem,
+} from "./lib/dedup.js";
 import { buildFeedMarkdown, normalizeSummary } from "./lib/markdown.js";
 import type { FeedItem, FeedManifest, SourceFetchResult } from "./lib/types.js";
 
@@ -29,19 +35,6 @@ function parseArgs(): { date: string } {
   const m = String(ist.getMonth() + 1).padStart(2, "0");
   const day = String(ist.getDate()).padStart(2, "0");
   return { date: `${y}-${m}-${day}` };
-}
-
-function normalizeUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].forEach(
-      (k) => u.searchParams.delete(k)
-    );
-    u.hash = "";
-    return u.toString();
-  } catch {
-    return url.trim();
-  }
 }
 
 function itemDate(item: { isoDate?: string; pubDate?: string }): Date | null {
@@ -80,7 +73,7 @@ async function fetchSource(
 
       items.push({
         title: entry.title.trim(),
-        link: normalizeUrl(link),
+        link: normalizeLink(link),
         published: pub ? pub.toISOString() : "unknown",
         summary,
         sourceId: source.id,
@@ -113,12 +106,16 @@ async function main() {
     console.log(`  • ${source.name}: ${status}`);
   }
 
-  const seen = new Set<string>();
+  const dedupIndex = loadPriorDedupIndex(FEED_DIR, date);
+  let skippedDuplicate = 0;
   const allItems: FeedItem[] = [];
   for (const r of results) {
     for (const item of r.items) {
-      if (seen.has(item.link)) continue;
-      seen.add(item.link);
+      if (isDuplicateFeedItem(dedupIndex, item)) {
+        skippedDuplicate++;
+        continue;
+      }
+      registerFeedItem(dedupIndex, item);
       allItems.push(item);
     }
   }
@@ -145,6 +142,7 @@ async function main() {
     sources_healthy: healthy,
     sources_dead: dead,
     item_count: allItems.length,
+    ...(skippedDuplicate > 0 ? { skipped_duplicate: skippedDuplicate } : {}),
     source_results: results.map((r) => ({
       id: r.source.id,
       name: r.source.name,
@@ -156,7 +154,11 @@ async function main() {
 
   const outPath = path.join(FEED_DIR, `${date}.md`);
   fs.writeFileSync(outPath, buildFeedMarkdown(manifest, itemsByCategory), "utf8");
-  console.log(`\nWrote ${outPath} (${allItems.length} items, ${healthy} healthy / ${dead} dead)`);
+  const skipNote =
+    skippedDuplicate > 0 ? `, ${skippedDuplicate} duplicate(s) skipped vs prior feeds` : "";
+  console.log(
+    `\nWrote ${outPath} (${allItems.length} items, ${healthy} healthy / ${dead} dead${skipNote})`
+  );
 }
 
 main().catch((e) => {

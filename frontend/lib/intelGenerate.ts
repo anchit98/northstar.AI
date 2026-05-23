@@ -39,12 +39,16 @@ export function resolveFeedContext(options: {
   mode: FeedInputMode;
   weekId: string;
   rollingDays?: number;
+  /** Groq context budget for feed markdown (compact summaries). */
+  maxFeedChars?: number;
 }): ResolvedFeedContext {
   const { mode, weekId } = options;
   const rollingDays = Math.min(14, Math.max(1, options.rollingDays ?? 7));
+  const isoMax = options.maxFeedChars ?? 38_000;
+  const rollingMax = options.maxFeedChars ?? 28_000;
 
   if (mode === "rolling-7") {
-    const rolling = getFeedMarkdownRollingDays(rollingDays);
+    const rolling = getFeedMarkdownRollingDays(rollingDays, rollingMax);
     return {
       weekId,
       mode,
@@ -57,7 +61,7 @@ export function resolveFeedContext(options: {
     };
   }
 
-  const week = getFeedMarkdownForWeek(weekId);
+  const week = getFeedMarkdownForWeek(weekId, isoMax);
   return {
     weekId,
     mode,

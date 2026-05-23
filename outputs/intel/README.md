@@ -27,6 +27,8 @@ npm run intel:fetch -- --date=2026-05-22
 
 GitHub Actions runs the same on schedule (~07:00 IST). **No Groq** in this path (DEC-25).
 
+**Dedup:** Each run skips items already seen in the last 14 days of feed files — same link, same source + title, or same source + summary body (for long repeats, e.g. X/Twitter). The manifest may include `skipped_duplicate: N`.
+
 ## On-demand Groq (workbench)
 
 | Route | API | Feed input |
