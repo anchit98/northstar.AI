@@ -85,7 +85,7 @@ Before treating Phase 12 as “done” for your job search workflow, confirm:
 
 ## Workbench
 
-Local NorthStar AI → `/workbench/intel` (passcode required). Set `GROQ_API_KEY` and `WORKBENCH_PASSCODE` in `frontend/.env`.
+Local NorthStar AI → `/workbench/intel`. Set `GROQ_API_KEY` in `frontend/.env` for Generate buttons.
 
 | Route | Phase |
 |-------|--------|

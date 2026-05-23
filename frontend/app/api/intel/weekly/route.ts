@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
 import { groqChatWithFallback } from "@/lib/groq";
-import { isWorkbenchAuthorized } from "@/lib/intelAuth";
 import {
   applyModelToGeneratedDoc,
   intelCitationWarnings,
@@ -17,10 +16,6 @@ const WEEKLY_DIR = path.join(process.cwd(), "../outputs/intel/weekly");
 const PROMPT_PATH = path.join(process.cwd(), "../prompts/intel_weekly.md");
 
 export async function POST(request: NextRequest) {
-  if (!isWorkbenchAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   let body: { week?: string; mode?: FeedInputMode };
   try {
     body = await request.json();

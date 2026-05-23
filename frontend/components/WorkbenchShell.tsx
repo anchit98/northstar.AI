@@ -46,7 +46,6 @@ function WorkbenchNavLinks({
 
 export function WorkbenchShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuth = pathname === "/workbench/auth";
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -65,14 +64,6 @@ export function WorkbenchShell({ children }: { children: React.ReactNode }) {
       window.removeEventListener("keydown", onKey);
     };
   }, [menuOpen]);
-
-  if (isAuth) {
-    return (
-      <div className="min-h-screen bg-surface-default flex items-center justify-center p-4 sm:p-6">
-        {children}
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-surface-default text-on-surface flex">

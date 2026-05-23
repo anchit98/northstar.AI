@@ -13,12 +13,12 @@ npm run intel:fetch
 
 # Frontend
 cd frontend
-copy .env.example .env   # set WORKBENCH_PASSCODE and GROQ_API_KEY
+copy .env.example .env   # set GROQ_API_KEY for intel Generate
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Workbench routes require your passcode.
+Open [http://localhost:3000](http://localhost:3000). Workbench is at `/workbench` (no login).
 
 ## Deploy (GitHub + Vercel)
 

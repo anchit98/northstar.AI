@@ -12,7 +12,7 @@ NorthStar AI is a **monorepo**: markdown at the repo root (`outputs/`, `inputs/`
 
 | Layer | Host | Role |
 |-------|------|------|
-| **App (UI + API)** | **Vercel** | Public resume routes, passcode workbench, `/api/intel/*`, `/api/auth` |
+| **App (UI + API)** | **Vercel** | Public resume routes, open workbench, `/api/intel/*` |
 | **Daily RSS ingest** | **GitHub Actions** | `npm run intel:fetch` → commits `outputs/intel/feed/*.md` (no LLM) |
 | **CI** | **GitHub Actions** | Lint + build on push/PR |
 
@@ -82,7 +82,7 @@ npm run intel:fetch
 
 cd frontend
 copy .env.example .env
-# Edit .env: WORKBENCH_PASSCODE, GROQ_API_KEY
+# Edit .env: GROQ_API_KEY (for intel Generate buttons)
 npm install
 npm run build
 ```
@@ -162,7 +162,6 @@ Vercel → Project → **Settings** → **Environment Variables** → **Producti
 
 | Variable | Required | Notes |
 |----------|----------|--------|
-| `WORKBENCH_PASSCODE` | **Yes** | Strong value; not `northstar-dev` |
 | `GROQ_API_KEY` | **Yes** (for Generate buttons) | Server-only |
 | `GROQ_MODEL` | Optional | Default: `meta-llama/llama-4-scout-17b-16e-instruct` |
 
@@ -178,9 +177,8 @@ Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 
 | Check | URL / action | Expected |
 |-------|----------------|----------|
-| Public resume | `/resume/one-page` | No passcode |
-| Workbench gate | `/workbench` | Redirect to `/workbench/auth` |
-| Login | Enter `WORKBENCH_PASSCODE` | Workbench loads |
+| Public resume | `/resume/one-page` | Renders |
+| Workbench | `/workbench` | Opens directly (no passcode) |
 | Intel feed | `/workbench/intel/feed` | Latest `feed/YYYY-MM-DD.md` |
 | Mobile nav | Resize to phone width | Bottom nav + menu work |
 
@@ -202,7 +200,7 @@ Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 | Ship UI/docs changes | `git push` to `main` → Vercel deploy |
 | Refresh daily RSS | Automatic via `intel-daily.yml`, or manual workflow run |
 | Add/remove feeds | Edit `outputs/intel/sources.md`, push; next fetch uses registry |
-| Rotate passcode | Update `WORKBENCH_PASSCODE` in Vercel → redeploy |
+| Workbench access | Open `/workbench` (no login) |
 | Preview branch | Push to `develop` (optional) → Vercel preview URL |
 
 ---
@@ -211,7 +209,7 @@ Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 
 | # | Check |
 |---|--------|
-| 1 | `WORKBENCH_PASSCODE` and `GROQ_API_KEY` not in git |
+| 1 | `GROQ_API_KEY` not in git |
 | 2 | Repo visibility matches sensitivity of `outputs/` |
 | 3 | [content_contract.md](../frontend/content_contract.md) — public routes only resume/projects/branding |
 | 4 | `/workbench/*` has `X-Robots-Tag: noindex` (middleware) |
@@ -225,7 +223,7 @@ Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 |-------|-----|
 | Vercel: `outputs/` not found | Root Directory must be `frontend`, full repo connected |
 | Build `EINVAL readlink` (Windows) | Delete `frontend/.next`, rebuild outside OneDrive sync if possible |
-| Workbench always redirects | Set `WORKBENCH_PASSCODE` on Vercel; redeploy |
+| Workbench 404 | Confirm Vercel root directory is `frontend` |
 | Groq 502 on Generate | Check `GROQ_API_KEY`, model name, payload size |
 | Feed empty on production | Run **Intel Daily Feed** workflow; confirm commit on `main`; wait for redeploy |
 | Actions cannot commit | Workflow permissions → Read and write |
@@ -241,7 +239,7 @@ Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 □ GitHub Actions: Intel Daily Feed manual run → feed commit
 □ GitHub Actions: CI green
 □ Vercel: import repo, root directory frontend
-□ Vercel: WORKBENCH_PASSCODE + GROQ_API_KEY
+□ Vercel: GROQ_API_KEY
 □ Smoke test public + workbench + intel feed
 □ (Optional) Custom domain on Vercel
 ```

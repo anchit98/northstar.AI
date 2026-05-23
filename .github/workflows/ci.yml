@@ -34,5 +34,4 @@ jobs:
       - run: npm run lint
       - run: npm run build
         env:
-          WORKBENCH_PASSCODE: ci-placeholder
           GROQ_API_KEY: dummy-not-used-in-build

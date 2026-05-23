@@ -17,7 +17,7 @@ These routes are accessible without authentication. They MUST NOT read any markd
 | `/branding` | `outputs/personal_branding.md` | Personal branding showcase |
 
 ## Private Workbench Layer `(workbench)/`
-These routes are protected by `middleware.ts` (passcode auth). They have access to sensitive positioning, outreach, and feedback data.
+These routes are under `/workbench/*` (not linked from public nav by default). They have access to sensitive positioning, outreach, and feedback data. **No passcode** — rely on repo privacy, `noindex`, and not publishing the workbench URL if content is sensitive.
 
 | Route | Permitted Markdown Sources | Purpose |
 |---|---|---|
@@ -34,4 +34,4 @@ These routes are protected by `middleware.ts` (passcode auth). They have access 
 
 ## Enforcement
 - `lib/content.ts` should be used carefully. Do not pass dynamic user input directly to the file reader.
-- The `middleware.ts` ensures that even if a workbench route is accessed, it will 401/redirect without the correct passcode.
+- `middleware.ts` sets `X-Robots-Tag: noindex` on workbench routes; `/workbench/auth` redirects to `/workbench`.

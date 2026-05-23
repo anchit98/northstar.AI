@@ -7,11 +7,11 @@ Private local UI for the Resume pipeline — resume viewers, workbench (outreach
 ```bash
 cd frontend
 npm install
-cp .env.example .env   # if present; set WORKBENCH_PASSCODE
+cp .env.example .env   # set GROQ_API_KEY for intel Generate
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Workbench routes require the passcode (`/workbench/auth`).
+Open [http://localhost:3000](http://localhost:3000). Workbench is at `/workbench` (no passcode).
 
 Content is read at **build time** from `../outputs/` and `../analysis/` (DEC-19). After editing markdown, restart `npm run dev` or run `npm run build`.
 
@@ -38,7 +38,6 @@ In the app: `/workbench/intel` — **per-source filter** (checkboxes by feed/per
 Requires in `frontend/.env`:
 
 ```env
-WORKBENCH_PASSCODE=...
 GROQ_API_KEY=...          # weekly + posts only
 GROQ_MODEL=meta-llama/llama-4-scout-17b-16e-instruct  # optional
 ```

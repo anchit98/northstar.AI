@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const WORKBENCH_PASSCODE = process.env.WORKBENCH_PASSCODE || "northstar-dev";
 const JD_DIR = path.join(process.cwd(), "../inputs/job_descriptions");
 
 function filenameFromTitle(title: string): string | null {
@@ -18,11 +17,6 @@ function filenameFromTitle(title: string): string | null {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = request.cookies.get("workbench_auth")?.value;
-  if (auth !== WORKBENCH_PASSCODE) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   let body: { title?: string; content?: string };
   try {
     body = await request.json();

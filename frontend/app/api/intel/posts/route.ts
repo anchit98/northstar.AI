@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
 import { groqChatWithFallback } from "@/lib/groq";
-import { isWorkbenchAuthorized } from "@/lib/intelAuth";
 import {
   applyModelToGeneratedDoc,
   resolveFeedContext,
@@ -24,10 +23,6 @@ const PROMPT_PATH = path.join(process.cwd(), "../prompts/intel_post.md");
 const VARIANT_COUNT = 2;
 
 export async function POST(request: NextRequest) {
-  if (!isWorkbenchAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const styleStatus = getLinkedinStyleStatus();
   if (!styleStatus.readyForGeneration) {
     return NextResponse.json(
