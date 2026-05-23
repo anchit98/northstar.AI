@@ -1,0 +1,33 @@
+# Phase 12 — Daily RSS ingest ONLY (no LLM — DEC-25)
+name: Intel Daily Feed
+
+on:
+  schedule:
+    # ~07:00 IST (01:30 UTC)
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install and fetch RSS
+        run: |
+          npm ci
+          npm run intel:fetch
+
+      - name: Commit daily feed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "intel: daily RSS feed $(date +%Y-%m-%d)"
+          file_pattern: outputs/intel/feed/*.md

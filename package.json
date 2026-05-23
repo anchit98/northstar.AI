@@ -1,0 +1,17 @@
+{
+  "name": "resume-northstar-ai",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "intel:fetch": "tsx scripts/intel/fetch.ts",
+    "intel:fetch:date": "tsx scripts/intel/fetch.ts --date",
+    "intel:archive": "tsx scripts/intel/archive.ts"
+  },
+  "dependencies": {
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

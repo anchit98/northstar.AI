@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth overflow-x-hidden;
+  }
+  body {
+    @apply bg-surface-default text-on-surface font-sans antialiased overflow-x-hidden;
+  }
+}
+
+@layer utilities {
+  .safe-area-pb {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  }
+  .type-metric-responsive {
+    font-size: 2rem;
+    line-height: 2.25rem;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+  }
+  @media (min-width: 640px) {
+    .type-metric-responsive {
+      font-size: 2.75rem;
+      line-height: 3rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .type-metric-responsive {
+      font-size: 3rem;
+      line-height: 3.5rem;
+    }
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  user-select: none;
+}
+
+.icon-fill {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+@layer components {
+  .prose-career {
+    @apply text-on-surface max-w-none;
+  }
+  .prose-career h1 {
+    @apply text-headline-lg font-bold text-on-surface mb-4 tracking-tight;
+  }
+  .prose-career h2 {
+    @apply text-headline-md font-semibold text-on-surface mt-8 mb-3 border-b border-outline-variant pb-2;
+  }
+  .prose-career h3 {
+    @apply text-lg font-semibold text-on-surface mt-6 mb-2;
+  }
+  .prose-career p {
+    @apply text-body-md text-on-surface-variant mb-3 leading-relaxed;
+  }
+  .prose-career ul {
+    @apply list-disc pl-5 mb-4 space-y-2 text-on-surface-variant;
+  }
+  .prose-career ol {
+    @apply list-decimal pl-5 mb-4 space-y-2 text-on-surface-variant;
+  }
+  .prose-career li {
+    @apply text-body-md leading-relaxed;
+  }
+  .prose-career strong {
+    @apply text-on-surface font-semibold;
+  }
+  .prose-career a {
+    @apply text-primary hover:underline;
+  }
+  .prose-career blockquote {
+    @apply border-l-2 border-primary-container pl-4 italic text-on-surface-variant my-4;
+  }
+  .prose-career .table-scroll {
+    @apply overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 my-4;
+  }
+  .prose-career table {
+    @apply w-full min-w-[20rem] text-sm border-collapse;
+  }
+  .prose-career th {
+    @apply text-left font-mono text-label-sm uppercase tracking-wider text-on-surface-variant border-b border-outline-variant py-2 px-2;
+  }
+  .prose-career td {
+    @apply border-b border-border-subtle py-2 px-2 text-on-surface-variant;
+  }
+  .prose-career hr {
+    @apply border-outline-variant my-8;
+  }
+  .prose-resume {
+    @apply prose-career text-[11pt] leading-snug;
+  }
+  .prose-resume h1 {
+    @apply text-[14pt] text-center uppercase tracking-wide mb-1;
+  }
+  .prose-resume h2 {
+    @apply text-[11pt] uppercase tracking-wider mt-4 mb-2;
+  }
+  .hook-highlight {
+    @apply inline-block bg-metrics-gold/15 border border-dashed border-metrics-gold text-metrics-gold rounded px-1.5 py-0.5 font-mono text-label-sm;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .prose-resume {
+    color: black !important;
+  }
+  .prose-resume h1,
+  .prose-resume h2,
+  .prose-resume strong,
+  .prose-resume li {
+    color: black !important;
+  }
+}

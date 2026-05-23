@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NorthStar AI - Interview Positioning</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#fbbc00",
+                      "tertiary": "#fbbc00",
+                      "surface-default": "#0B0F14",
+                      "on-secondary-fixed-variant": "#462cb1",
+                      "on-tertiary": "#402d00",
+                      "secondary-fixed-dim": "#c9bfff",
+                      "inverse-surface": "#e0e2ea",
+                      "on-error-container": "#ffdad6",
+                      "tertiary-fixed": "#ffdfa0",
+                      "private-workbench": "#907CFF",
+                      "on-background": "#e0e2ea",
+                      "on-secondary-container": "#b7aaff",
+                      "error-container": "#93000a",
+                      "secondary-container": "#462cb1",
+                      "primary-fixed-dim": "#a2c9ff",
+                      "tertiary-container": "#c69400",
+                      "surface-raised": "#141A22",
+                      "surface-container": "#1c2025",
+                      "secondary": "#c9bfff",
+                      "surface-tint": "#a2c9ff",
+                      "outline-variant": "#414751",
+                      "surface": "#101419",
+                      "on-primary": "#00315b",
+                      "success-green": "#10B981",
+                      "on-primary-fixed-variant": "#004880",
+                      "surface-variant": "#31353b",
+                      "metrics-gold": "#FFBF00",
+                      "primary": "#a2c9ff",
+                      "on-tertiary-container": "#443000",
+                      "error": "#ffb4ab",
+                      "primary-fixed": "#d3e4ff",
+                      "surface-container-highest": "#31353b",
+                      "on-secondary": "#2e019b",
+                      "outline": "#8b919c",
+                      "on-surface": "#e0e2ea",
+                      "surface-container-low": "#181c21",
+                      "on-primary-container": "#003560",
+                      "on-tertiary-fixed": "#261a00",
+                      "on-tertiary-fixed-variant": "#5c4300",
+                      "surface-dim": "#101419",
+                      "surface-container-high": "#262a30",
+                      "surface-bright": "#36393f",
+                      "border-subtle": "rgba(51, 65, 85, 0.12)",
+                      "background": "#101419",
+                      "on-primary-fixed": "#001c38",
+                      "surface-overlay": "#1C2430",
+                      "on-error": "#690005",
+                      "primary-container": "#5b9fed",
+                      "surface-container-lowest": "#0a0e13",
+                      "on-secondary-fixed": "#1a0063",
+                      "inverse-on-surface": "#2d3136",
+                      "inverse-primary": "#0060a8",
+                      "on-surface-variant": "#c1c7d3",
+                      "secondary-fixed": "#e5deff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "8px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "32px",
+                      "gutter": "24px",
+                      "rail-width": "72px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Hanken Grotesk"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "body-md": ["Hanken Grotesk"],
+                      "body-lg": ["Hanken Grotesk"],
+                      "label-md": ["JetBrains Mono"],
+                      "metric-display": ["Hanken Grotesk"],
+                      "label-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "metric-display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "800"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for high-end feel */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #31353b; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #414751; }
+    </style>
+</head>
+<body class="bg-surface-default text-on-surface h-screen w-full flex overflow-hidden font-body-md">
+<!-- SideNavBar (JSON Component) -->
+<nav class="bg-surface-default dark:bg-surface-default fixed left-0 top-0 h-full w-rail-width border-r border-outline-variant flex flex-col items-center py-base gap-gutter z-40 hidden md:flex">
+<!-- Logo/Avatar area omitted per brand logo hidden style, using just top padding -->
+<div class="mt-4 flex flex-col gap-6 w-full items-center flex-1">
+<a class="flex flex-col items-center gap-1 text-on-surface opacity-40 hover:bg-surface-variant transition-opacity scale-110 transition-transform duration-200 p-2 rounded-lg w-14" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface opacity-40 hover:bg-surface-variant transition-opacity scale-110 transition-transform duration-200 p-2 rounded-lg w-14" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">description</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[10px]">Resume</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface opacity-40 hover:bg-surface-variant transition-opacity scale-110 transition-transform duration-200 p-2 rounded-lg w-14" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">folder_shared</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[10px]">Projects</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface opacity-40 hover:bg-surface-variant transition-opacity scale-110 transition-transform duration-200 p-2 rounded-lg w-14" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">auto_awesome</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[10px]">Branding</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface opacity-40 hover:bg-surface-variant transition-opacity scale-110 transition-transform duration-200 p-2 rounded-lg w-14" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">open_in_new</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[10px]">Portfolio</span>
+</a>
+</div>
+<div class="flex flex-col gap-6 w-full items-center mb-4">
+<a class="flex flex-col items-center gap-1 text-on-surface opacity-40 hover:bg-surface-variant transition-opacity scale-110 transition-transform duration-200 p-2 rounded-lg w-14" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface opacity-40 hover:bg-surface-variant transition-opacity scale-110 transition-transform duration-200 p-2 rounded-lg w-14" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col md:ml-[72px] h-full overflow-hidden">
+<!-- TopAppBar (JSON Component) -->
+<header class="bg-surface-raised dark:bg-surface-raised docked full-width top-0 z-50 border-b border-outline-variant flex items-center justify-between px-margin-desktop h-16 w-full shrink-0">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">NorthStar AI</span>
+<div class="h-6 w-[1px] bg-outline-variant mx-2"></div>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">lock</span>
+                    Interview Positioning
+                </span>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search on right -->
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-default border border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded-full pl-9 pr-4 py-1.5 text-body-md font-body-md text-on-surface placeholder:text-on-surface-variant w-64 transition-all" placeholder="Search workbench..." type="text"/>
+</div>
+<!-- Trailing Actions -->
+<button class="bg-private-workbench text-on-primary font-label-md text-label-md px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2 shadow-[0_0_15px_rgba(144,124,255,0.2)]">
+<span class="material-symbols-outlined text-[18px]">engineering</span>
+                    Private Workbench
+                </button>
+<div class="flex items-center gap-2">
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors scale-95 active:scale-90 transition-transform p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors scale-95 active:scale-90 transition-transform p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-outline-variant ml-2" data-alt="A close-up, high-quality portrait of a professional individual looking directly at the camera. The lighting is studio-quality, creating a sharp and modern aesthetic. The background is a subtle, dark gradient that matches the dark mode UI environment, seamlessly blending into the interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgBdCoPogAIP0TyK5AhoqD0xUlbE1SAMnMZ84vczvLtaYoGHhZV6n_4BRvsJlPGiDweL6CnEiV4iHuxahhwkGgK6f5WFVZ_0D2l5x0geQa-yUpih-0lL7pS6kBXI_a7GRVkconpI0bJkjcNqV8YKDNKvieckCN_n7-NL-ujhurQiur0aGHk-dTdfZ1LBZshz2bfz4sOe4IQNftAky7CvyjsvxjL_IuXLZOwBGNhW6ktZ_qUDEnKBxo49UlRYx14_zF_fzjpPuhzVul"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Canvas -->
+<div class="flex-1 overflow-y-auto p-margin-desktop bg-surface-default">
+<div class="max-w-7xl mx-auto flex flex-col gap-8">
+<!-- Page Header & Tabs -->
+<div class="flex flex-col gap-6">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Interview Positioning</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Private prep tool. High-density reference for upcoming behavioral and technical rounds.</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-raised border border-border-subtle text-on-surface font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">print</span>
+                                Export
+                            </button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="flex gap-8 border-b border-outline-variant">
+<button class="text-primary font-bold border-b-2 border-primary pb-3 font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                            STAR Stories
+                        </button>
+<button class="text-on-surface-variant font-medium hover:text-on-surface transition-colors pb-3 font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">psychology</span>
+                            Weakness Reframing
+                        </button>
+<button class="text-on-surface-variant font-medium hover:text-on-surface transition-colors pb-3 font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+                            Compensation Playbook
+                        </button>
+</div>
+</div>
+<!-- High-Density Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left Col: STAR Stories (Col Span 8) -->
+<div class="lg:col-span-8 flex flex-col gap-4">
+<div class="flex justify-between items-center mb-2">
+<h2 class="font-headline-md text-headline-md text-on-surface">Core Competencies</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider bg-surface-raised px-3 py-1 rounded-full border border-border-subtle">3 Stories Prepped</span>
+</div>
+<!-- Card 1: Discovery (Expanded) -->
+<div class="bg-surface-raised border border-border-subtle rounded-xl overflow-hidden shadow-sm">
+<div class="p-5 border-b border-outline-variant flex justify-between items-center bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">explore</span>
+</div>
+<h3 class="font-headline-md text-[20px] font-semibold text-on-surface">Discovery &amp; Validation</h3>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">expand_less</span>
+</div>
+<div class="p-6 flex flex-col gap-6 bg-surface-raised">
+<!-- S -->
+<div class="grid grid-cols-[24px_1fr] gap-4">
+<div class="font-metric-display text-[24px] text-outline-variant font-bold leading-none mt-1">S</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Situation</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Legacy product "Alpha" was seeing a 15% MoM churn rate. Leadership wanted to rewrite the entire codebase, assuming technical debt was the root cause.</p>
+</div>
+</div>
+<!-- T -->
+<div class="grid grid-cols-[24px_1fr] gap-4">
+<div class="font-metric-display text-[24px] text-outline-variant font-bold leading-none mt-1">T</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Task</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">I needed to validate if a technical rewrite would actually solve the user pain points before committing 6 months of engineering bandwidth.</p>
+</div>
+</div>
+<!-- A -->
+<div class="grid grid-cols-[24px_1fr] gap-4">
+<div class="font-metric-display text-[24px] text-outline-variant font-bold leading-none mt-1">A</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Action</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Halted the rewrite. Conducted 20 user interviews and implemented Hotjar. Discovered the issue wasn't performance, but a deeply confusing navigation hierarchy introduced in Q3.</p>
+</div>
+</div>
+<!-- R (Highlighted) -->
+<div class="grid grid-cols-[24px_1fr] gap-4 bg-tertiary-fixed-dim/5 p-4 rounded-lg border border-tertiary-fixed-dim/20 -mx-4 -mb-4">
+<div class="font-metric-display text-[24px] text-tertiary font-bold leading-none mt-1">R</div>
+<div>
+<h4 class="font-label-md text-label-md text-tertiary mb-1">Result</h4>
+<p class="font-body-lg text-body-lg text-metrics-gold font-semibold">Pivoted to a 2-week UI redesign instead of a 6-month rewrite. Reduced churn by 22% in the following quarter and saved an estimated $120k in engineering costs.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: MVP (Collapsed) -->
+<div class="bg-surface-raised border border-border-subtle rounded-xl overflow-hidden shadow-sm opacity-80 hover:opacity-100 transition-opacity">
+<div class="p-5 flex justify-between items-center cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">rocket_launch</span>
+</div>
+<h3 class="font-headline-md text-[20px] font-semibold text-on-surface">MVP Scoping</h3>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm text-tertiary border border-tertiary/30 px-2 py-0.5 rounded text-[10px]">High Impact</span>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Card 3: Metrics (Collapsed) -->
+<div class="bg-surface-raised border border-border-subtle rounded-xl overflow-hidden shadow-sm opacity-80 hover:opacity-100 transition-opacity">
+<div class="p-5 flex justify-between items-center cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">monitoring</span>
+</div>
+<h3 class="font-headline-md text-[20px] font-semibold text-on-surface">Data &amp; Metrics</h3>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Right Col: Playbooks (Col Span 4) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<!-- Compensation Playbook Widget -->
+<div class="bg-surface-overlay border border-border-subtle rounded-xl p-6 relative overflow-hidden">
+<!-- Subtle glow effect -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-success-green/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-success-green">payments</span>
+<h3 class="font-headline-md text-[20px] font-bold text-on-surface">Comp Tier Table</h3>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Stretch -->
+<div class="flex justify-between items-center p-3 rounded-lg bg-surface-default border border-outline-variant/50">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="font-label-md text-label-md text-on-surface">Stretch</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-bold">₹40L</span>
+</div>
+<!-- Primary -->
+<div class="flex justify-between items-center p-3 rounded-lg bg-surface-raised border border-success-green/30 ring-1 ring-success-green/20">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-success-green"></div>
+<span class="font-label-md text-label-md text-success-green font-bold">Primary Target</span>
+</div>
+<span class="font-label-md text-label-md text-success-green font-bold text-lg">₹35L</span>
+</div>
+<!-- Floor -->
+<div class="flex justify-between items-center p-3 rounded-lg bg-surface-default border border-outline-variant/50">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">Walk Away Floor</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">₹28L</span>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30">
+<p class="font-label-sm text-label-sm text-on-surface-variant leading-relaxed">
+<span class="text-on-surface font-semibold">Tactic:</span> Anchor at ₹42L if asked first. Pivot to stock options if base is capped at ₹32L.
+                                </p>
+</div>
+</div>
+<!-- Weakness Reframing Teaser -->
+<div class="bg-surface-raised border border-border-subtle rounded-xl p-6">
+<h3 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-4 border-b border-outline-variant pb-2">Quick Reframes</h3>
+<ul class="flex flex-col gap-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline-variant text-[18px] mt-0.5">change_circle</span>
+<div>
+<span class="font-label-md text-label-md text-on-surface block line-through opacity-50">"I lack enterprise sales experience."</span>
+<span class="font-body-md text-body-md text-primary mt-1 block">"I index heavily on product-led growth, allowing us to scale without linear headcount."</span>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline-variant text-[18px] mt-0.5">change_circle</span>
+<div>
+<span class="font-label-md text-label-md text-on-surface block line-through opacity-50">"I can be impatient."</span>
+<span class="font-body-md text-body-md text-primary mt-1 block">"I have a strong bias for action and prefer iterative shipping over prolonged consensus."</span>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
