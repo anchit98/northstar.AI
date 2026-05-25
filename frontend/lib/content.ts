@@ -13,6 +13,15 @@ export type ContentMeta = {
   baseDir: "outputs" | "analysis";
 };
 
+/** Only parse YAML frontmatter when the file starts with --- (avoids eating HRs in branding MD). */
+function splitMarkdownFile(fileContents: string): { data: Record<string, unknown>; content: string } {
+  if (!/^---\r?\n/.test(fileContents)) {
+    return { data: {}, content: fileContents };
+  }
+  const { data, content } = matter(fileContents);
+  return { data: data as Record<string, unknown>, content };
+}
+
 export function getMarkdownContent(
   filePath: string,
   baseDir: "outputs" | "analysis" = "outputs"
@@ -22,7 +31,7 @@ export function getMarkdownContent(
 
   try {
     const fileContents = fs.readFileSync(fullPath, "utf8");
-    const { data, content } = matter(fileContents);
+    const { data, content } = splitMarkdownFile(fileContents);
     const version = extractVersion(fileContents, data);
     const rawDate = data.date;
     const date =

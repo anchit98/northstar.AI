@@ -3,11 +3,14 @@
 import { useMemo, useState } from "react";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { CopyButton } from "@/components/CopyButton";
-import { parseBrandingSections } from "@/lib/brandingSections";
+import { parseBrandingSections, type BrandingSection } from "@/lib/brandingSections";
 import { cn } from "@/lib/utils";
 
 type BrandingViewerProps = {
-  content: string;
+  /** Pre-parsed on the server so deploy/build bakes full section bodies into the page. */
+  sections?: BrandingSection[];
+  /** Fallback when only raw markdown is available. */
+  content?: string;
 };
 
 function extractIntroScript(markdown: string): string | null {
@@ -43,7 +46,7 @@ function IntroductionsPanel({ content }: { content: string }) {
               <h3 className="text-headline-md font-semibold text-on-surface">{b.title}</h3>
               {b.script && <CopyButton text={b.script} label="Copy script" />}
             </div>
-            <MarkdownRenderer content={b.body} className="min-w-0 max-w-full overflow-x-hidden" />
+            <MarkdownRenderer content={b.body} className="w-full" />
           </article>
         ))}
       </div>
@@ -51,14 +54,17 @@ function IntroductionsPanel({ content }: { content: string }) {
   );
 }
 
-export function BrandingViewer({ content }: BrandingViewerProps) {
-  const sections = useMemo(() => parseBrandingSections(content), [content]);
+export function BrandingViewer({ sections: sectionsProp, content }: BrandingViewerProps) {
+  const sections = useMemo(
+    () => sectionsProp ?? (content ? parseBrandingSections(content) : []),
+    [sectionsProp, content]
+  );
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "overview");
 
   const active = sections.find((s) => s.id === activeId) ?? sections[0];
 
   if (!active) {
-    return <MarkdownRenderer content={content} />;
+    return content ? <MarkdownRenderer content={content} /> : null;
   }
 
   return (
@@ -87,11 +93,21 @@ export function BrandingViewer({ content }: BrandingViewerProps) {
         ))}
       </div>
 
-      <div role="tabpanel" className="min-h-[12rem] min-w-0 w-full max-w-full overflow-x-hidden">
-        {active.id === "interview-introductions" ? (
+      <div
+        key={activeId}
+        role="tabpanel"
+        className="min-h-[12rem] w-full"
+      >
+        {!active.content.trim() ? (
+          <p className="text-sm text-on-surface-variant font-mono">
+            This section has no content yet. Check that{" "}
+            <code className="text-primary">outputs/personal_branding.md</code> is present in the
+            deployment build.
+          </p>
+        ) : active.id === "interview-introductions" ? (
           <IntroductionsPanel content={active.content} />
         ) : (
-          <MarkdownRenderer content={active.content} />
+          <MarkdownRenderer content={active.content} className="w-full" />
         )}
       </div>
     </div>

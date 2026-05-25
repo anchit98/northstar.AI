@@ -40,10 +40,14 @@ export function parseBrandingSections(markdown: string): BrandingSection[] {
   const sections: BrandingSection[] = [];
 
   if (intro) {
+    const overviewBody = intro
+      .replace(/^#\s+Personal Branding[^\n]*\n+/i, "")
+      .replace(/^---\s*\n+/m, "")
+      .trim();
     sections.push({
       id: "overview",
       label: "Overview",
-      content: intro,
+      content: overviewBody || intro,
     });
   }
 

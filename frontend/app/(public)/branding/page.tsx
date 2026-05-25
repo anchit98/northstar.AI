@@ -1,9 +1,11 @@
 import { getMarkdownContent } from "@/lib/content";
+import { parseBrandingSections } from "@/lib/brandingSections";
 import { BrandingViewer } from "@/components/BrandingViewer";
 import { SyncFooter } from "@/components/SyncFooter";
 
 export default function BrandingPage() {
   const { content, meta } = getMarkdownContent("personal_branding.md");
+  const sections = parseBrandingSections(content);
 
   return (
     <div className="flex flex-col gap-8">
@@ -14,7 +16,7 @@ export default function BrandingPage() {
         </p>
       </div>
       <div className="min-w-0 w-full max-w-full">
-        <BrandingViewer content={content} />
+        <BrandingViewer sections={sections} />
       </div>
       <SyncFooter meta={meta} />
     </div>
