@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "intel:fetch": "tsx scripts/intel/fetch.ts",
+    "intel:fetch:dry": "tsx scripts/intel/fetch.ts --dry-run",
     "intel:fetch:date": "tsx scripts/intel/fetch.ts --date",
     "intel:archive": "tsx scripts/intel/archive.ts"
   },

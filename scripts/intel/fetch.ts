@@ -13,28 +13,33 @@ import {
   normalizeLink,
   registerFeedItem,
 } from "./lib/dedup.js";
+import { mapWithConcurrency, withTimeout } from "./lib/fetchPool.js";
 import { buildFeedMarkdown, normalizeSummary } from "./lib/markdown.js";
 import type { FeedItem, FeedManifest, SourceFetchResult } from "./lib/types.js";
 
 const parser = new Parser({
-  timeout: 20000,
+  timeout: 15000,
   headers: { "User-Agent": "NorthStarAI-Intel-Fetch/1.0 (personal RSS reader)" },
 });
 
 const MAX_AGE_HOURS = 48;
+/** Hard cap per source — rss-parser timeout alone can hang on some hosts (Nitter, etc.). */
+const SOURCE_FETCH_TIMEOUT_MS = 22_000;
+const FETCH_CONCURRENCY = 8;
 
-function parseArgs(): { date: string } {
+function parseArgs(): { date: string; dryRun: boolean } {
+  const dryRun = process.argv.includes("--dry-run");
   const arg = process.argv.find((a) => a.startsWith("--date"));
   if (arg) {
     const d = arg.split("=")[1];
-    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) return { date: d };
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) return { date: d, dryRun };
   }
   const now = new Date();
   const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
   const y = ist.getFullYear();
   const m = String(ist.getMonth() + 1).padStart(2, "0");
   const day = String(ist.getDate()).padStart(2, "0");
-  return { date: `${y}-${m}-${day}` };
+  return { date: `${y}-${m}-${day}`, dryRun };
 }
 
 function itemDate(item: { isoDate?: string; pubDate?: string }): Date | null {
@@ -90,21 +95,40 @@ async function fetchSource(
   }
 }
 
+async function fetchSourceSafe(
+  source: ReturnType<typeof loadSources>[0]
+): Promise<SourceFetchResult> {
+  try {
+    return await withTimeout(
+      fetchSource(source),
+      SOURCE_FETCH_TIMEOUT_MS,
+      source.name
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { source, ok: false, error: message, items: [] };
+  }
+}
+
 async function main() {
-  const { date } = parseArgs();
+  const { date, dryRun } = parseArgs();
   const sources = loadSources().filter((s) => s.enabled);
 
   if (!fs.existsSync(FEED_DIR)) fs.mkdirSync(FEED_DIR, { recursive: true });
 
-  console.log(`[intel:fetch] ${date} — ${sources.length} enabled sources (no LLM)`);
+  const modeLabel = dryRun ? "dry-run" : "write";
+  console.log(
+    `[intel:fetch] ${date} — ${sources.length} enabled sources (${modeLabel}, concurrency ${FETCH_CONCURRENCY}, ${SOURCE_FETCH_TIMEOUT_MS}ms/source cap)`
+  );
 
-  const results: SourceFetchResult[] = [];
-  for (const source of sources) {
-    const result = await fetchSource(source);
-    results.push(result);
+  const started = Date.now();
+  const results = await mapWithConcurrency(sources, FETCH_CONCURRENCY, async (source) => {
+    const result = await fetchSourceSafe(source);
     const status = result.ok ? `ok (${result.items.length})` : `FAIL: ${result.error}`;
     console.log(`  • ${source.name}: ${status}`);
-  }
+    return result;
+  });
+  console.log(`[intel:fetch] RSS pull finished in ${((Date.now() - started) / 1000).toFixed(1)}s`);
 
   const dedupIndex = loadPriorDedupIndex(FEED_DIR, date);
   let skippedDuplicate = 0;
@@ -153,9 +177,18 @@ async function main() {
   };
 
   const outPath = path.join(FEED_DIR, `${date}.md`);
-  fs.writeFileSync(outPath, buildFeedMarkdown(manifest, itemsByCategory), "utf8");
+  const markdown = buildFeedMarkdown(manifest, itemsByCategory);
   const skipNote =
     skippedDuplicate > 0 ? `, ${skippedDuplicate} duplicate(s) skipped vs prior feeds` : "";
+
+  if (dryRun) {
+    console.log(
+      `\n[dry-run] Would write ${outPath} (${allItems.length} items, ${healthy} healthy / ${dead} dead${skipNote})`
+    );
+    return;
+  }
+
+  fs.writeFileSync(outPath, markdown, "utf8");
   console.log(
     `\nWrote ${outPath} (${allItems.length} items, ${healthy} healthy / ${dead} dead${skipNote})`
   );

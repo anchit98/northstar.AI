@@ -252,6 +252,7 @@ Redeploy after saving env vars (**Deployments** → ⋮ → **Redeploy**).
 | Feed empty on production          | Run **Intel Daily Feed** workflow; confirm commit on `main`; wait for redeploy |
 | Actions cannot commit             | Workflow permissions → Read and write                                          |
 | Push rejected                     | `git pull --rebase origin main` then push                                      |
+| Intel Daily Feed runs for hours   | Fixed: 25m job timeout, 22s/source hard cap, parallel fetch; use workflow **dry_run** to test |
 
 
 ---

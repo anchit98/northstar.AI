@@ -25,7 +25,13 @@ Optional date (IST calendar day):
 npm run intel:fetch -- --date=2026-05-22
 ```
 
-GitHub Actions runs the same on schedule (~07:00 IST). **No Groq** in this path (DEC-25).
+Dry-run (fetch all sources, no file write — used in CI):
+
+```bash
+npm run intel:fetch:dry
+```
+
+GitHub Actions runs the same on schedule (~07:00 IST). **No Groq** in this path (DEC-25). Manual **workflow_dispatch** on `Intel Daily Feed` supports **dry_run** (no commit).
 
 **Dedup:** Each run skips items already seen in the last 14 days of feed files — same link, same source + title, or same source + summary body (for long repeats, e.g. X/Twitter). The manifest may include `skipped_duplicate: N`.
 

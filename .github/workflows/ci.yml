@@ -9,14 +9,17 @@ on:
 jobs:
   intel-fetch-dry:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
-      - run: npm ci
-      - run: npm run intel:fetch
+      - name: Install and dry-run fetch
+        run: |
+          npm ci
+          npm run intel:fetch -- --dry-run
 
   frontend:
     runs-on: ubuntu-latest
